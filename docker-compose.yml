@@ -1,0 +1,67 @@
+version: '3.1'
+
+services:
+  remove-sound-telegram-bot:
+    container_name: remove-sound-telegram-bot:latest
+    image: infinitu1327/remove-sound-telegram-bot
+    restart: always
+    depends_on:
+      - telegram-bot-api
+      - remove-sound-telegram-bot-database
+      - remove-sound-telegram-bot-ffmpeg-sqs-worker
+    volumes:
+      - /remove-sound-telegram-bot/input:/data/input
+      - /remove-sound-telegram-bot/output:/data/output
+    environment:
+      Telegram:Token:
+      ConnectionStrings:Default: 'Server=remove-sound-telegram-bot-database;Port=5432;Database=remove_sound_telegram_bot;User Id=postgres;Password=password;'
+      ApplicationInsights:InstrumentationKey:
+      Workers:DownloaderQueueUrl:
+      Workers:ConverterQueueUrl:
+      Workers:UploaderQueueUrl:
+      Workers:Delay: "00:00:30"
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      Folders:InputFolder:
+      Folders:OutputFolder:
+  remove-sound-telegram-bot-ffmpeg-sqs-worker:
+    container_name: remove-sound-telegram-bot-ffmpeg-sqs-worker
+    image: infinitu1327/ffmpeg-sqs-worker:latest
+    restart: always
+    volumes:
+      - /remove-sound-telegram-bot/input:/data/input
+      - /remove-sound-telegram-bot/output:/data/output
+    environment:
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      Amazon:InputQueueUrl:
+      Amazon:OutputQueueUrl:
+      Folders:InputFolderPath:
+      Folders:OutputFolderPath:
+      FFMpeg:Path:
+      ApplicationInsights:InstrumentationKey:
+      Delay: 30
+  telegram-bot-api:
+    container_name: telegram-bot-api
+    image: aiogram/telegram-bot-api:latest
+    restart: always
+    ports:
+      - "65500:8081"
+    volumes:
+      - /telegram-bot-api-data:/var/lib/telegram-bot-api
+    environment:
+      TELEGRAM_API_ID:
+      TELEGRAM_API_HASH:
+      TELEGRAM_LOCAL: 'true'
+  remove-sound-telegram-bot-database:
+    container_name: remove-sound-telegram-bot-database
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - /pg/remove-sound-telegram-bot:/var/lib/postgresql/data
