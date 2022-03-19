@@ -8,9 +8,6 @@ pr: none
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  ImageName: 'infinitu1327/webmtomp4bot'
-
 stages:
   - stage: Build
     displayName: Build image
