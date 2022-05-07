@@ -11,37 +11,38 @@ using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+var services = builder.Services;
 
 // Add services to the container.
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("Default")));
+services.AddDbContext<AppDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("Default")));
 
-builder.Services
+services
     .Configure<TelegramSettings>(configuration.GetSection(TelegramSettings.SectionName))
     .Configure<FoldersSettings>(configuration.GetSection(FoldersSettings.SectionName))
     .Configure<WorkersSettings>(configuration.GetSection(WorkersSettings.SectionName));
 
-builder.Services
+services
     .AddSingleton<MessageService>()
     .AddSingleton<SQSService>();
 
-builder.Services
+services
     .AddHostedService<DownloaderWorker>()
     .AddHostedService<UploaderWorker>();
 
-builder.Services.AddSingleton<ITelegramBotClient>(sp =>
+services.AddSingleton<ITelegramBotClient>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<TelegramSettings>>().Value;
 
     return new TelegramBotClient(settings.Token);
 });
 
-builder.Services
+services
     .AddSingleton<IAmazonSQS>(_ => new AmazonSQSClient(new EnvironmentVariablesAWSCredentials(), RegionEndpoint.EUCentral1));
 
-builder.Services.AddApplicationInsightsTelemetry();
+services.AddApplicationInsightsTelemetry();
 
-builder.Services.AddControllers()
+services.AddControllers()
     .AddNewtonsoftJson();
 
 var app = builder.Build();

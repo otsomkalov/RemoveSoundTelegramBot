@@ -40,13 +40,13 @@ public class UploaderWorker : BackgroundService
             try
             {
                 await RunAsync(dbContext, stoppingToken);
-
-                await Task.Delay(_workersSettings.Delay, stoppingToken);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error during UploaderWorker execution:");
             }
+
+            await Task.Delay(_workersSettings.Delay, stoppingToken);
         }
     }
 

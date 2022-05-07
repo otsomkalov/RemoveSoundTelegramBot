@@ -25,7 +25,8 @@ public class DownloaderWorker : BackgroundService
     private readonly SQSService _sqsService;
 
     public DownloaderWorker(ILogger<DownloaderWorker> logger, IAmazonSQS sqsClient, ITelegramBotClient bot,
-        IServiceScopeFactory serviceScopeFactory, IOptions<FoldersSettings> foldersSettings, IOptions<WorkersSettings> workersSettings, SQSService sqsService)
+        IServiceScopeFactory serviceScopeFactory, IOptions<FoldersSettings> foldersSettings, IOptions<WorkersSettings> workersSettings,
+        SQSService sqsService)
     {
         _logger = logger;
         _sqsClient = sqsClient;
@@ -48,13 +49,13 @@ public class DownloaderWorker : BackgroundService
             try
             {
                 await RunAsync(dbContext, stoppingToken);
-
-                await Task.Delay(_workersSettings.Delay, stoppingToken);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error during DownloaderWorker execution:");
             }
+
+            await Task.Delay(_workersSettings.Delay, stoppingToken);
         }
     }
 
