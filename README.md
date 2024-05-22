@@ -1,3 +1,5 @@
+**This project is archived and now a part of [ffmpeg-telegram-bot](https://github.com/otsomkalov/ffmpeg-telegram-bot)**
+
 # Remove Sound Telegram Bot
 
 Telegram Bot used to remove sound from video
